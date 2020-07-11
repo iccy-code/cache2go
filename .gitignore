@@ -9,3 +9,6 @@ _test
 
 # Backup files
 *~
+go.sum
+go.mod
+.vscode

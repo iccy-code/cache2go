@@ -162,6 +162,7 @@ func (table *CacheTable) expirationCheck() {
 	// Setup the interval for the next cleanup run.
 	table.cleanupInterval = smallestDuration
 	if smallestDuration > 0 {
+		// 更新定时器, 使其时间到了再次运行该函数
 		table.cleanupTimer = time.AfterFunc(smallestDuration, func() {
 			go table.expirationCheck()
 		})
@@ -189,6 +190,7 @@ func (table *CacheTable) addInternal(item *CacheItem) {
 
 	// If we haven't set up any expiration check timer or found a more imminent item.
 	if item.lifeSpan > 0 && (expDur == 0 || item.lifeSpan < expDur) {
+		// 刷新计时器
 		table.expirationCheck()
 	}
 }
@@ -228,6 +230,7 @@ func (table *CacheTable) deleteInternal(key interface{}) (*CacheItem, error) {
 	r.RLock()
 	defer r.RUnlock()
 	if r.aboutToExpire != nil {
+		// 这是项自己的删除回调方法
 		for _, callback := range r.aboutToExpire {
 			callback(key)
 		}
@@ -235,6 +238,7 @@ func (table *CacheTable) deleteInternal(key interface{}) (*CacheItem, error) {
 
 	table.Lock()
 	table.log("Deleting item with key", key, "created on", r.createdOn, "and hit", r.accessCount, "times from table", table.name)
+	// 正式删除
 	delete(table.items, key)
 
 	return r, nil

@@ -28,6 +28,7 @@ func Cache(table string) *CacheTable {
 		mutex.Lock()
 		t, ok = cache[table]
 		// Double check whether the table exists or not.
+		// 再次检查一遍是否存在该表, 比较谨慎
 		if !ok {
 			t = &CacheTable{
 				name:  table,
